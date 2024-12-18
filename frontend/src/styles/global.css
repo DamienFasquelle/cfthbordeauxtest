@@ -1,0 +1,41 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  color: #592f2f;
+  background-color: #f6f0f0;
+}
+
+h2 {
+  color: #9c7088;
+}
+h3 {
+  color: #68031e;
+}
+
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.carousel-container {
+  position: relative;
+}
+
+.carousel-legend-container .legend {
+  font-size: 14px;
+  margin-top: 8px;
+}
