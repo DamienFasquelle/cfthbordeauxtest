@@ -1,65 +1,88 @@
 import React, { useState } from 'react';
 
-const VosPhotos = () => {
-  const [photos, setPhotos] = useState([
-    { id: 1, url: 'https://via.placeholder.com/150', uploader: 'Sarah' },
-    { id: 2, url: 'https://via.placeholder.com/150', uploader: 'Damien' },
-  ]);
 
-  const [newPhotoUrl, setNewPhotoUrl] = useState('');
-  const [uploaderName, setUploaderName] = useState('');
+const AjouterPhoto = () => {
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  const handleAddPhoto = () => {
-    if (newPhotoUrl && uploaderName) {
-      setPhotos([
-        ...photos,
-        { id: photos.length + 1, url: newPhotoUrl, uploader: uploaderName },
-      ]);
-      setNewPhotoUrl('');
-      setUploaderName('');
-    }
+  // Gestion du fichier
+  const handleFileChange = (e) => {
+    setSelectedFile(e.target.files[0]);
+    setSuccess('');
+    setError('');
   };
+
+  // Gestion de l'ajout d'une photo
+  const handleAddPhoto = async () => {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      setError('Vous devez être connecté pour ajouter une photo.');
+      return;
+    }
+
+    if (!selectedFile) {
+      setError('Veuillez sélectionner une image.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('path', selectedFile);
+
+      try {
+        setUploading(true);
+      setError('');
+        const response = await fetch('http://127.0.0.1:8000/images', {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              
+            },
+            body: formData,
+        });
+
+      if (response.ok) {
+      setSuccess('Votre photo a été ajoutée avec succès.');
+      setSelectedFile(null);
+    } else {
+      const result = await response.json();
+      setError(result.error || 'Échec de l’envoi de l’image. Veuillez réessayer.');
+    }
+  } catch (err) {
+    console.error('Erreur lors de l’upload de l’image :', err);
+    setError('Échec de l’envoi de l’image. Veuillez réessayer.');
+  } finally {
+    setUploading(false);
+  }
+};
 
   return (
     <div className="container my-5">
-      <h1 className="text-center mb-4">Vos Photos</h1>
+      <h1 className="text-center mb-4">Ajouter une Photo</h1>
+     
+      {success && <div className="alert alert-success">{success}</div>}
+    
+      {error && <div className="alert alert-danger">{error}</div>}
 
-      {/* Ajouter une nouvelle photo */}
       <div className="mb-4">
         <input
-          type="text"
-          placeholder="URL de l'image"
+          type="file"
           className="form-control mb-2"
-          value={newPhotoUrl}
-          onChange={(e) => setNewPhotoUrl(e.target.value)}
+          onChange={handleFileChange}
         />
-        <input
-          type="text"
-          placeholder="Nom de l'uploader"
-          className="form-control mb-2"
-          value={uploaderName}
-          onChange={(e) => setUploaderName(e.target.value)}
-        />
-        <button onClick={handleAddPhoto} className="btn text-white" style={{ backgroundColor: '#592F2F' }}>
-          Ajouter une photo
+        <button
+          onClick={handleAddPhoto}
+          className="btn text-white"
+          style={{ backgroundColor: '#592F2F' }}
+          disabled={uploading}
+        >
+          {uploading ? 'Uploading...' : 'Ajouter une photo'}
         </button>
       </div>
-
-      {/* Galerie de photos */}
-      {/* <div className="row">
-        {photos.map((photo) => (
-          <div className="col-md-4 mb-4" key={photo.id}>
-            <div className="card">
-              <img src={photo.url} className="card-img-top" alt="Uploaded" />
-              <div className="card-body">
-                <p className="card-text text-center">Ajouté par: {photo.uploader}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div> */}
     </div>
   );
 };
 
-export default VosPhotos;
+export default AjouterPhoto;
